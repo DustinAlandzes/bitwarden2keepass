@@ -29,9 +29,7 @@ def parse():
     groups = {}
     for folder in folders:
         group = folders[folder]
-        # print("created group:", group)
         groups[group] = create_kp_group(str(group).title())
-    # print("groups:", groups)
 
     for item in j["items"]:
         group = folders[item["folderId"]]
@@ -40,11 +38,13 @@ def parse():
         password = None
         uris = []
         totp = None
-        extra = []
+        notes = []
 
+        if "notes" in item and item["notes"]:
+            notes.append(item["notes"])
         if "fields" in item:
             for field in item["fields"]:
-                extra.append("%s: %s" % (field["name"], field["value"]))
+                notes.append("%s: %s" % (field["name"], field["value"]))
                 
         if "login" in item:
             login = item["login"]
@@ -58,11 +58,10 @@ def parse():
             if "totp" in login:
                 totp = login["totp"]
 
-
             # take just the first URL
             if uris:
                 url = uris[0]
-    
+                
             groups[group]["Entry"].append(
                 get_kp_entry(
                     title,
@@ -70,7 +69,7 @@ def parse():
                     password=password,
                     url=url,
                     otp=totp,
-                    notes=', '.join(extra),
+                    notes='\n'.join(notes),
                 )
             )
 
@@ -93,7 +92,8 @@ def get_kp_entry(title, username, password, url, notes, otp):
             {"Key": "Password", "Value": password},
             {"Key": "URL", "Value": url},
             {"Key": "Notes", "Value": notes},
-            {"Key": "otp", "Value": otp},
+            {"Key": "TOTP Seed", "Value": otp},
+            {"Key": "TOTP Settings", "Value": "30;6"},
         ]
     }
     return entry
