@@ -5,14 +5,14 @@ import glob
 import json
 
 
-def parseFolders(bitwardenFolders):
+def parse_folders(bitwardenFolders):
     folders = {}
     for folder in bitwardenFolders:
         folders[folder["id"]] = folder["name"]
     return folders
 
 
-def readBitwardenJson(fname):
+def read_bitwarden_json(fname):
     with open(fname) as f:
         inJson = f.read()
         input = json.loads(inJson)
@@ -20,12 +20,11 @@ def readBitwardenJson(fname):
 
 
 def parse():
-
     filename = glob.glob("bitwarden_export_*.json")[0]
 
-    j = readBitwardenJson(filename)
+    j = read_bitwarden_json(filename)
 
-    folders = parseFolders(j["folders"])
+    folders = parse_folders(j["folders"])
     groups = {}
     for folder in folders:
         group = folders[folder]
@@ -45,7 +44,7 @@ def parse():
         if "fields" in item:
             for field in item["fields"]:
                 notes.append("%s: %s" % (field["name"], field["value"]))
-                
+
         if "login" in item:
             login = item["login"]
             if "username" in login:
@@ -61,7 +60,9 @@ def parse():
             # take just the first URL
             if uris:
                 url = uris[0]
-                
+            else:
+                url = ""
+
             groups[group]["Entry"].append(
                 get_kp_entry(
                     title,
@@ -69,7 +70,7 @@ def parse():
                     password=password,
                     url=url,
                     otp=totp,
-                    notes='\n'.join(notes),
+                    notes="\n".join(notes),
                 )
             )
 
