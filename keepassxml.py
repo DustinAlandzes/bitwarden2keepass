@@ -8,7 +8,8 @@ import json
 def parse_folders(bitwardenFolders):
     folders = {}
     for folder in bitwardenFolders:
-        folders[folder["id"]] = folder["name"]
+        if folder["id"]:
+            folders[folder["id"]] = folder["name"]
     return folders
 
 
