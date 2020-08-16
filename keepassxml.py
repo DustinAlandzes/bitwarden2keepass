@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from typing import List, Tuple, Optional
 
 import xmltodict
 import glob
@@ -6,6 +7,7 @@ import json
 
 
 def parse_folders(bitwardenFolders):
+    # type: (List[dict]) -> dict
     folders = {}
     for folder in bitwardenFolders:
         folders[folder["id"]] = folder["name"]
@@ -13,13 +15,40 @@ def parse_folders(bitwardenFolders):
 
 
 def read_bitwarden_json(fname):
+    # type: (str) -> dict
     with open(fname) as f:
         inJson = f.read()
         input = json.loads(inJson)
         return input
 
 
+def create_kp_group(name):
+    # type: (str) -> dict
+    group = {
+        "Name": name,
+        "Entry": [],
+    }
+    return group
+
+
+def get_kp_entry(title, username, password, url, notes, otp):
+    # type: (str, Optional[Tuple[str, ...]], Optional[Tuple[str, ...]], str, str, str) -> dict
+    entry = {
+        "String": [
+            {"Key": "Title", "Value": title},
+            {"Key": "UserName", "Value": username},
+            {"Key": "Password", "Value": password},
+            {"Key": "URL", "Value": url},
+            {"Key": "Notes", "Value": notes},
+            {"Key": "TOTP Seed", "Value": otp},
+            {"Key": "TOTP Settings", "Value": "30;6"},
+        ]
+    }
+    return entry
+
+
 def parse():
+    # type: () -> dict
     filename = glob.glob("bitwarden_export_*.json")[0]
 
     j = read_bitwarden_json(filename)
@@ -88,29 +117,6 @@ def parse():
                     )
                 )
     return groups.values()
-
-
-def create_kp_group(name):
-    group = {
-        "Name": name,
-        "Entry": [],
-    }
-    return group
-
-
-def get_kp_entry(title, username, password, url, notes, otp):
-    entry = {
-        "String": [
-            {"Key": "Title", "Value": title},
-            {"Key": "UserName", "Value": username},
-            {"Key": "Password", "Value": password},
-            {"Key": "URL", "Value": url},
-            {"Key": "Notes", "Value": notes},
-            {"Key": "TOTP Seed", "Value": otp},
-            {"Key": "TOTP Settings", "Value": "30;6"},
-        ]
-    }
-    return entry
 
 
 def main():
