@@ -12,7 +12,8 @@ LOGGER = logging.getLogger(__name__)
 def parse_folders(bitwarden_folders: List[dict]) -> dict:
     folders = {}
     for folder in bitwarden_folders:
-        folders[folder["id"]] = folder["name"]
+        if folder["id"]:
+            folders[folder["id"]] = folder["name"]
     return folders
 
 
@@ -52,6 +53,8 @@ def parse() -> any:
     if len(bitwarden_export_json_files) > 1:
         LOGGER.warning("Found multiple bitwarden backups, using %s", filename)
 
+    for item in j["items"]:
+        group = "root"
     with open(filename) as f:
         parsed_json: dict = json.loads(f.read())
 
@@ -90,33 +93,20 @@ def parse() -> any:
                 totp = login["totp"]
 
             # take just the first URL
+            url = ""
             if uris:
                 url = uris[0]
-            else:
-                url = ""
 
-            if group:
-                groups[group]["Entry"].append(
-                    get_kp_entry(
-                        title,
-                        username=username,
-                        password=password,
-                        url=url,
-                        otp=totp,
-                        notes="\n".join(notes),
-                    )
+            groups[group]["Entry"].append(
+                get_kp_entry(
+                    title,
+                    username=username,
+                    password=password,
+                    url=url,
+                    otp=totp,
+                    notes="\n".join(notes),
                 )
-            else:
-                groups["root"]["Entry"].append(
-                    get_kp_entry(
-                        title,
-                        username=username,
-                        password=password,
-                        url=url,
-                        otp=totp,
-                        notes="\n".join(notes),
-                    )
-                )
+            )
     return groups.values()
 
 
