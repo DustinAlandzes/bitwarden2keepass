@@ -32,7 +32,7 @@ def parse():
         groups[group] = create_kp_group(str(group).title())
 
     for item in j["items"]:
-        group = None
+        group = "root"
         if item["folderId"]:
             group = folders[item["folderId"]]
         title = item["name"]
@@ -66,28 +66,16 @@ def parse():
             else:
                 url = ""
 
-            if group:
-                groups[group]["Entry"].append(
-                    get_kp_entry(
-                        title,
-                        username=username,
-                        password=password,
-                        url=url,
-                        otp=totp,
-                        notes="\n".join(notes),
-                    )
+            groups[group]["Entry"].append(
+                get_kp_entry(
+                    title,
+                    username=username,
+                    password=password,
+                    url=url,
+                    otp=totp,
+                    notes="\n".join(notes),
                 )
-            else:
-                groups["root"]["Entry"].append(
-                    get_kp_entry(
-                        title,
-                        username=username,
-                        password=password,
-                        url=url,
-                        otp=totp,
-                        notes="\n".join(notes),
-                    )
-                )
+            )
     return groups.values()
 
 
