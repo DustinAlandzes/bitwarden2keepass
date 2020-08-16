@@ -25,13 +25,15 @@ def parse():
     j = read_bitwarden_json(filename)
 
     folders = parse_folders(j["folders"])
-    groups = {}
+    groups = {"root": {"Entry": []}}
     for folder in folders:
         group = folders[folder]
         groups[group] = create_kp_group(str(group).title())
 
     for item in j["items"]:
-        group = folders[item["folderId"]]
+        group = None
+        if item["folderId"]:
+            group = folders[item["folderId"]]
         title = item["name"]
         username = None
         password = None
@@ -63,17 +65,28 @@ def parse():
             else:
                 url = ""
 
-            groups[group]["Entry"].append(
-                get_kp_entry(
-                    title,
-                    username=username,
-                    password=password,
-                    url=url,
-                    otp=totp,
-                    notes="\n".join(notes),
+            if group:
+                groups[group]["Entry"].append(
+                    get_kp_entry(
+                        title,
+                        username=username,
+                        password=password,
+                        url=url,
+                        otp=totp,
+                        notes="\n".join(notes),
+                    )
                 )
-            )
-
+            else:
+                groups["root"]["Entry"].append(
+                    get_kp_entry(
+                        title,
+                        username=username,
+                        password=password,
+                        url=url,
+                        otp=totp,
+                        notes="\n".join(notes),
+                    )
+                )
     return groups.values()
 
 
